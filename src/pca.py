@@ -1,20 +1,29 @@
-import sys # to access the system
+import sys  # to access the system
 import numpy as np
 import glob
 import cv2
 
 #  read and image
 
+
 def loadImageDatabase():
     faces = []
 
-    for img in glob.glob('../../Dataset_VA53/*R.jpeg'):
+    for img in glob.glob('../Dataset_VA53/*R.jpeg'):
         faces.append(cv2.imread(img, 0))
 
     return faces
 
+
+def matrixToLine(faces):
+    matrix = []
+    for face in faces:
+        matrix.append(face.flatten())
+    return matrix
+
+
 faces = loadImageDatabase()
-cv2.imshow("Face", faces[4])
+matrix = matrixToLine(faces)
 
 # define a video capture object
 # device = cv2.VideoCapture(0)
