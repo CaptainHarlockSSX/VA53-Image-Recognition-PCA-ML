@@ -1,7 +1,10 @@
+import os
 import sys  # to access the system
 import numpy as np
 import glob
 import cv2
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 # Pick images from dataset and load them
 
@@ -9,10 +12,12 @@ import cv2
 def loadImageDatabase():
     faces = []
 
-    for img in glob.glob('../Dataset_VA53/*R.jpeg'):
+    for img in glob.glob('../Dataset_VA53/Train_Set/*.jpeg'):
         faces.append(cv2.imread(img, 0))
 
-    return faces
+    faceshape = faces[0].shape
+
+    return faces, faceshape
 
 
 def picturesToLines(faces):
@@ -21,7 +26,7 @@ def picturesToLines(faces):
     for face in faces:
         # Each pic become one line of the MxN matrix
         pics.append(face.flatten())
-    pics = np.array(pics).transpose()
+    pics = np.array(pics)
     return pics
 
 
@@ -40,13 +45,39 @@ def findEigenvectors(mat):
     return normEigenV
 
 
-faces = loadImageDatabase()
+faces, faceshape = loadImageDatabase()
 pics = picturesToLines(faces)
-test = np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9], [4, 5, 6, 7, 8,
-                9, 10, 11, 12], [7, 8, 9, 10, 11, 12, 13, 14, 15]]).transpose()
-print(test)
-test2 = findEigenvectors(test)
-print(test2)
+# matrix = findEigenvectors(pics)
+
+pca = PCA().fit(pics)
+
+# Take the first K principal components as eigenfaces
+n_components = 16
+eigenpics = pca.components_[:n_components]
+
+weights = eigenpics @ (pics - pca.mean_).transpose()
+
+while True:
+    file = '../Dataset_VA53/Test_Set/' + input("Person name : ") + '_0.jpeg'
+    if file == "QUIT":
+        break
+    if os.path.exists(file):
+        query = cv2.imread(file, 0).reshape(1, -1)
+        break
+    else:
+        print("Person not found !")
+
+query_weight = eigenpics @ (query - pca.mean_).T
+
+euclidean_distance = np.linalg.norm(weights - query_weight, axis=0)
+best_match = np.argmin(euclidean_distance)
+# Visualize
+fig, axes = plt.subplots(1, 2)
+axes[0].imshow(query.reshape(faceshape), cmap="gray")
+axes[0].set_title("Query")
+axes[1].imshow(pics[best_match].reshape(faceshape), cmap="gray")
+axes[1].set_title("Best match")
+plt.show()
 
 # define a video capture object
 # device = cv2.VideoCapture(0)
