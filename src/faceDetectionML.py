@@ -49,16 +49,6 @@ def loadImageDatabase():
 # Load data sets
 (testSet, testLabels) = loadImageDatabase()
 
-# # print(trainSet.shape)
-# # print(testSet.shape)
-#
-# # cv2.imshow("Tronche", trainSet[5])
-# # print(trainLabels[5])
-# #
-# while(True):
-#     if cv2.waitKey(10) == 27:
-#         break
-
 # Get saved ML model
 model = tf.keras.models.load_model('../../SavedModels/faceRecognitionModel')
 
@@ -81,19 +71,7 @@ for i in range(len(testSet)):
         if cv2.waitKey(0) == 32:
             break;
 
-print("OK")
-
-# define a video capture object
-# device = cv2.VideoCapture(0)
-
-# while True:
-    # ret, currentFrame = device.read()
-    # currentFrame = cv2.flip(currentFrame, 1)
-    #
-    # cv2.imshow("Camera Stream", currentFrame)
-
-    # if cv2.waitKey(10) == 27:
-    #     break
+print("End Program")
 
 sys.exit() # Exit from all the processes
 cv2.destroyAllWindows() # Destroy all windows

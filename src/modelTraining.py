@@ -76,7 +76,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Train model
-model.fit(trainSet, trainLabels, epochs=50)
+model.fit(trainSet, trainLabels, epochs=1)
 
 # Save model
-model.save('../../SavedModels/faceRecognitionModel')
+model.save('../../SavedModels/faceRecognitionModel_1')
