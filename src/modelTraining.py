@@ -9,6 +9,8 @@ import tensorflow as tf
 labelID = []
 
 # Regex to get the name of the person on the image, based on the filename
+
+
 def getLabel(fileName):
     pattern = re.compile('^(.*\/)*(?P<name>.+)(_[0-9]*\.jpeg){1}$')
     found = pattern.match(fileName)
@@ -27,9 +29,10 @@ def loadImageDatabase():
     # Load arrays with images if the size is 2000x2000 px
     for img in glob.glob('../../Test_Set/*.jpeg'):
         image = cv2.imread(img, 0)
-        if image.shape == (2000,2000):
+        if image.shape == (2000, 2000):
             testSet.append(image)
-            name = getLabel(img) # Extract name of the person from the filename
+            # Extract name of the person from the filename
+            name = getLabel(img)
 
             if name not in labelID:
                 labelID.append(name)
@@ -38,9 +41,10 @@ def loadImageDatabase():
 
     for img in glob.glob('../../Train_Set/*.jpeg'):
         image = cv2.imread(img, 0)
-        if image.shape == (2000,2000):
+        if image.shape == (2000, 2000):
             trainSet.append(image)
-            name = getLabel(img) # Extract name of the person from the filename
+            # Extract name of the person from the filename
+            name = getLabel(img)
 
             if name not in labelID:
                 labelID.append(name)
@@ -48,9 +52,9 @@ def loadImageDatabase():
             trainLabels.append(labelID.index(name))
 
     # Convert arrays to numpy arrays
-    trainSet = np.array(trainSet, dtype = np.uint8)
+    trainSet = np.array(trainSet, dtype=np.uint8)
     trainLabels = np.asarray(trainLabels)
-    testSet = np.array(testSet, dtype = np.uint8)
+    testSet = np.array(testSet, dtype=np.uint8)
     testLabels = np.asarray(testLabels)
 
     # Scale colors from 0 - 255 to 0 - 1
@@ -60,6 +64,7 @@ def loadImageDatabase():
     return (trainSet, trainLabels, testSet, testLabels)
 
 ##################### main #####################
+
 
 # Load data sets
 (trainSet, trainLabels, testSet, testLabels) = loadImageDatabase()
@@ -72,7 +77,8 @@ model = tf.keras.Sequential([
 
 # Compile model
 model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(
+                  from_logits=True),
               metrics=['accuracy'])
 
 # Train model

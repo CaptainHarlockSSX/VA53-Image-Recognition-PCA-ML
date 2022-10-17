@@ -12,17 +12,23 @@ import math
 
 
 def loadImageDatabase():
-    faces = []
-    names = []
+    trainSet, trainLabels = [], []
+    testSet, testLabels = [], []
 
-    for img in glob.glob('../Dataset_VA53/Train_Set/*.jpeg'):
-        faces.append(cv2.imread(img, 0))
-        names.append(re.findall(
-            '../Dataset_VA53/Train_Set/(.*)_.*.jpeg', img)[0])
+    for train in glob.glob('../../Train_Set/*.jpeg'):
+        trainSet.append(cv2.imread(train, 0))
+        trainLabels.append(re.findall(
+            '../../Train_Set/(.*)_.*.jpeg', train)[0])
 
-    names = np.array(names)
-    faceshape = faces[0].shape
-    return faces, faceshape, names
+    for test in glob.glob('../../Test_Set/*.jpeg'):
+        testSet.append(cv2.imread(test, 0))
+        testLabels.append(re.findall(
+            '../../Test_Set/(.*)_.*.jpeg', test)[0])
+
+    trainLabels = np.array(trainLabels)
+    testLabels = np.array(testLabels)
+    faceshape = trainSet[0].shape
+    return (trainSet, trainLabels, testSet, testLabels, faceshape)
 
 
 def picturesToLines(faces):
@@ -66,7 +72,7 @@ def createPCAFaces(A, order):
 
 def getImageInputByName():
     while True:
-        file = '../Dataset_VA53/Test_Set/' + \
+        file = '../../Test_Set/' + \
             input("Person name : ") + '_0.jpeg'
         if file == "QUIT":
             break
@@ -78,59 +84,37 @@ def getImageInputByName():
     return query
 
 
-def identifyFace():
-    faces, faceshape, names = loadImageDatabase()
-    A = picturesToLines(faces)
+def identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape):
+    A = picturesToLines(trainSet)
 
     e_faces, pca = createPCAFaces(A, 20)
 
     weights = e_faces @ (A - pca.mean_).transpose()
 
     # query = getImageInputByName() #if you want to test one image at a time
-    test_images = glob.glob('../Dataset_VA53/Test_Set/*.jpeg')
-    sample_size = len(test_images)
-    rows = math.ceil(sample_size / 2)
-    fig, axs = plt.subplots(2, rows)
+    sample_size = len(testSet)
+    cols = math.ceil(sample_size / 2)
+    fig, axs = plt.subplots(2, cols)
 
-    for idx, file in enumerate(test_images):
-        query = cv2.imread(file, 0).reshape(1, -1)
+    for idx, query in enumerate(testSet):
+        query = query.reshape(1, -1)
         q_weight = e_faces @ (query - pca.mean_).T
 
         euclidean_distance = np.linalg.norm(weights - q_weight, axis=0)
         best_match = np.argmin(euclidean_distance)
 
-        row = 0 if (idx < rows) else 1
+        row = 0 if (idx < cols) else 1
 
-        realname = re.findall(
-            '../Dataset_VA53/Test_Set/(.*)_.*.jpeg', file)[0]
-
-        axs[row, idx % rows].imshow(query.reshape(faceshape), cmap="gray")
-        axs[row, idx % rows].set_title(
-            names[best_match] + '(' + realname + ')')
-        axs[row, idx % rows].set_yticklabels([])
-        axs[row, idx % rows].set_xticklabels([])
+        axs[row, idx % cols].imshow(query.reshape(faceshape), cmap="gray")
+        axs[row, idx % cols].set_title(
+            trainLabels[best_match] + '(' + testLabels[idx] + ')')
+        axs[row, idx % cols].set_yticklabels([])
+        axs[row, idx % cols].set_xticklabels([])
     if (sample_size % 2 == 1):
         axs[-1, -1].axis('off')
     plt.show()
     return 1
 
 
-identifyFace()
-# loadImageDatabase()
-
-
-# define a video capture object
-# device = cv2.VideoCapture(0)
-
-# while True:
-#     # ret, currentFrame = device.read()
-#     # currentFrame = cv2.flip(currentFrame, 1)
-#     #
-#     # cv2.imshow("Camera Stream", currentFrame)
-
-#     if cv2.waitKey(10) == 27:
-#         break
-#
-# device.release()
-# sys.exit() # to exit from all the processes
-# cv2.destroyAllWindows() # destroy all windows
+(trainSet, trainLabels, testSet, testLabels, faceshape) = loadImageDatabase()
+identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape)
