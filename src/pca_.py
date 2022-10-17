@@ -9,8 +9,6 @@ import matplotlib.pyplot as plt
 import math
 
 # Pick images from dataset and load them
-
-
 def loadImageDatabase():
     trainSet, trainLabels = [], []
     testSet, testLabels = [], []
@@ -30,7 +28,7 @@ def loadImageDatabase():
     faceshape = trainSet[0].shape
     return (trainSet, trainLabels, testSet, testLabels, faceshape)
 
-
+@profile
 def picturesToLines(faces):
     # M pixels (width*height = M) times N samples
     A = []
@@ -41,8 +39,6 @@ def picturesToLines(faces):
     return A
 
 # Was supposed to be the base of our own PCA method
-
-
 def findEigenvectors(mat):
     # Substracting the mean vector to all vectors
     subMatrix = mat - mat.mean(axis=0, keepdims=True)
@@ -57,7 +53,7 @@ def findEigenvectors(mat):
 
     return normEigenV
 
-
+@profile
 def createPCAFaces(A, order):
     # matrix = findEigenvectors(A)
 
@@ -83,7 +79,7 @@ def getImageInputByName():
             print("Person not found !")
     return query
 
-
+@profile
 def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_faces):
 
     # query = getImageInputByName() #if you want to test one image at a time
@@ -99,7 +95,6 @@ def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_fa
         best_match = np.argmin(euclidean_distance)
 
         # Showing results
-
         row = 0 if (idx < cols) else 1
 
         axs[row, idx % cols].imshow(query.reshape(faceshape), cmap="gray")
@@ -109,17 +104,16 @@ def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_fa
         axs[row, idx % cols].set_xticklabels([])
 
     # Odd number of test images leave an empty set of axis in the last subplot
-
     if (sample_size % 2 == 1):
         axs[-1, -1].axis('off')
     plt.show()
     return 1
 
-
+##################### main #####################
 (trainSet, trainLabels, testSet, testLabels, faceshape) = loadImageDatabase()
 A = picturesToLines(trainSet)
 
-e_faces, pca = createPCAFaces(A, 20)
+e_faces, pca = createPCAFaces(A, 1)
 
 weights = e_faces @ (A - pca.mean_).transpose()
 identifyFace(trainLabels, testSet, testLabels,

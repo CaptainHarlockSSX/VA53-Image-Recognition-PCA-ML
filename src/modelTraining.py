@@ -97,4 +97,4 @@ model = compileModel(model)
 model = trainModel(model, trainSet, trainLabels, 50)
 
 # Save model
-model.save('../../SavedModels/faceRecognitionModel_50')
+# model.save('../../SavedModels/faceRecognitionModel_50')
