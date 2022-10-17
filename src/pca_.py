@@ -103,6 +103,8 @@ def identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape):
         euclidean_distance = np.linalg.norm(weights - q_weight, axis=0)
         best_match = np.argmin(euclidean_distance)
 
+        # Showing results
+
         row = 0 if (idx < cols) else 1
 
         axs[row, idx % cols].imshow(query.reshape(faceshape), cmap="gray")
@@ -110,6 +112,9 @@ def identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape):
             trainLabels[best_match] + '(' + testLabels[idx] + ')')
         axs[row, idx % cols].set_yticklabels([])
         axs[row, idx % cols].set_xticklabels([])
+
+    # Odd number of test images leave an empty set of axis in the last subplot
+
     if (sample_size % 2 == 1):
         axs[-1, -1].axis('off')
     plt.show()
