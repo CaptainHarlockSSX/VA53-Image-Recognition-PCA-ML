@@ -84,12 +84,7 @@ def getImageInputByName():
     return query
 
 
-def identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape):
-    A = picturesToLines(trainSet)
-
-    e_faces, pca = createPCAFaces(A, 20)
-
-    weights = e_faces @ (A - pca.mean_).transpose()
+def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_faces):
 
     # query = getImageInputByName() #if you want to test one image at a time
     sample_size = len(testSet)
@@ -122,4 +117,10 @@ def identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape):
 
 
 (trainSet, trainLabels, testSet, testLabels, faceshape) = loadImageDatabase()
-identifyFace(trainSet, trainLabels, testSet, testLabels, faceshape)
+A = picturesToLines(trainSet)
+
+e_faces, pca = createPCAFaces(A, 20)
+
+weights = e_faces @ (A - pca.mean_).transpose()
+identifyFace(trainLabels, testSet, testLabels,
+             faceshape, weights, pca, e_faces)
