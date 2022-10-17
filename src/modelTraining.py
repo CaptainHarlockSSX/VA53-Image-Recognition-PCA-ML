@@ -59,24 +59,39 @@ def loadImageDatabase():
 
     return (trainSet, trainLabels, testSet, testLabels)
 
+@profile
+def buildModel():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Flatten(input_shape=(2000, 2000)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(11)])
+    return model
+
+@profile
+def compileModel(model):
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
+    return model
+
+@profile
+def trainModel(model, trainSet, trainLabels, iterations):
+    model.fit(trainSet, trainLabels, epochs=iterations)
+    return model
+
 ##################### main #####################
 
 # Load data sets
 (trainSet, trainLabels, testSet, testLabels) = loadImageDatabase()
 
 # Build ML model
-model = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(2000, 2000)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(11)])
+model = buildModel()
 
 # Compile model
-model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
+model = compileModel(model)
 
 # Train model
-model.fit(trainSet, trainLabels, epochs=1)
+model = trainModel(model, trainSet, trainLabels, 50)
 
 # Save model
-model.save('../../SavedModels/faceRecognitionModel_1')
+model.save('../../SavedModels/faceRecognitionModel_50')

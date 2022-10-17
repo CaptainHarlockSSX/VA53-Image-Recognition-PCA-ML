@@ -44,19 +44,29 @@ def loadImageDatabase():
 
     return (testSet, testLabels)
 
+@profile
+def buildProbaModel(model):
+    probabilityModel = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
+    return probabilityModel
+
+@profile
+def predictFaces(probabilityModel, testSet):
+    predictions = probabilityModel.predict(testSet)
+    return predictions
+
 ##################### main #####################
 
 # Load data sets
 (testSet, testLabels) = loadImageDatabase()
 
 # Get saved ML model
-model = tf.keras.models.load_model('../../SavedModels/faceRecognitionModel')
+model = tf.keras.models.load_model('../../SavedModels/faceRecognitionModel_50')
 
 # Build the probability model to process predictions on chosen images
-probabilityModel = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
+probabilityModel = buildProbaModel(model)
 
 # Gather the predictions values
-predictions = probabilityModel.predict(testSet)
+predictions = predictFaces(probabilityModel, testSet)
 
 for i in range(len(testSet)):
     bestPrediction = np.argmax(predictions[i])
