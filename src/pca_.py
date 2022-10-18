@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import math
 
 # Pick images from dataset and load them
+
+
 def loadImageDatabase():
     trainSet, trainLabels = [], []
     testSet, testLabels = [], []
@@ -28,6 +30,7 @@ def loadImageDatabase():
     faceshape = trainSet[0].shape
     return (trainSet, trainLabels, testSet, testLabels, faceshape)
 
+
 @profile
 def picturesToLines(faces):
     # M pixels (width*height = M) times N samples
@@ -39,6 +42,8 @@ def picturesToLines(faces):
     return A
 
 # Was supposed to be the base of our own PCA method
+
+
 def findEigenvectors(mat):
     # Substracting the mean vector to all vectors
     subMatrix = mat - mat.mean(axis=0, keepdims=True)
@@ -52,6 +57,7 @@ def findEigenvectors(mat):
     normEigenV = eigenV/np.linalg.norm(eigenV)
 
     return normEigenV
+
 
 @profile
 def createPCAFaces(A, order):
@@ -79,25 +85,35 @@ def getImageInputByName():
             print("Person not found !")
     return query
 
+
 @profile
-def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_faces):
+def identifyFace(testSet, weights, pca, e_faces):
 
     # query = getImageInputByName() #if you want to test one image at a time
-    sample_size = len(testSet)
-    cols = math.ceil(sample_size / 2)
-    fig, axs = plt.subplots(2, cols)
 
-    for idx, query in enumerate(testSet):
+    best_matches = []
+
+    for query in testSet:
         query = query.reshape(1, -1)
         q_weight = e_faces @ (query - pca.mean_).T
 
         euclidean_distance = np.linalg.norm(weights - q_weight, axis=0)
-        best_match = np.argmin(euclidean_distance)
+        best_matches.append(np.argmin(euclidean_distance))
+
+    return best_matches
+
+
+def showResults(trainLabels, testSet, testLabels, best_matches):
+    sample_size = len(testSet)
+    cols = math.ceil(sample_size / 2)
+    fig, axs = plt.subplots(2, cols)
+    for idx, best_match in enumerate(best_matches):
 
         # Showing results
         row = 0 if (idx < cols) else 1
 
-        axs[row, idx % cols].imshow(query.reshape(faceshape), cmap="gray")
+        axs[row, idx % cols].imshow(
+            testSet[idx].reshape(faceshape), cmap="gray")
         axs[row, idx % cols].set_title(
             trainLabels[best_match] + '(' + testLabels[idx] + ')')
         axs[row, idx % cols].set_yticklabels([])
@@ -107,7 +123,9 @@ def identifyFace(trainLabels, testSet, testLabels, faceshape, weights, pca, e_fa
     if (sample_size % 2 == 1):
         axs[-1, -1].axis('off')
     plt.show()
+
     return 1
+
 
 ##################### main #####################
 (trainSet, trainLabels, testSet, testLabels, faceshape) = loadImageDatabase()
@@ -116,5 +134,5 @@ A = picturesToLines(trainSet)
 e_faces, pca = createPCAFaces(A, 1)
 
 weights = e_faces @ (A - pca.mean_).transpose()
-identifyFace(trainLabels, testSet, testLabels,
-             faceshape, weights, pca, e_faces)
+best_matches = identifyFace(testSet, weights, pca, e_faces)
+showResults(trainLabels, testSet, testLabels, best_matches)
