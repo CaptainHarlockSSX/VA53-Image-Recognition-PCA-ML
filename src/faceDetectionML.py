@@ -24,7 +24,7 @@ def loadImageDatabase():
     testSet, testLabels = [], []
 
     # Load arrays with images if the size is 2000x2000 px
-    for img in glob.glob('../../Test_Set/*.jpeg'):
+    for img in glob.glob('../../Test_Set/*.jpeg'): # Set path to testing images set
         image = cv2.imread(img, 0)
         if image.shape == (2000, 2000):
             testSet.append(image)
@@ -45,24 +45,22 @@ def loadImageDatabase():
 
     return (testSet, testLabels)
 
-@profile
+# @profile
 def buildProbaModel(model):
     probabilityModel = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
     return probabilityModel
 
-@profile
+# @profile
 def predictFaces(probabilityModel, testSet):
     predictions = probabilityModel.predict(testSet)
     return predictions
 
 ##################### main #####################
-
-
 # Load data sets
 (testSet, testLabels) = loadImageDatabase()
 
 # Get saved ML model
-model = tf.keras.models.load_model('../../SavedModels/faceRecognitionModel_50')
+model = tf.keras.models.load_model('../../SavedModels/faceRecognitionModel_10') # Set path for saved model
 
 # Build the probability model to process predictions on chosen images
 probabilityModel = buildProbaModel(model)
@@ -84,8 +82,6 @@ for i in range(len(testSet)):
     while(True):
         if cv2.waitKey(0) == 32:
             break
-
-print("End Program")
 
 sys.exit()  # Exit from all the processes
 cv2.destroyAllWindows()  # Destroy all windows

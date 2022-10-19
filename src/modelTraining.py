@@ -25,7 +25,7 @@ def loadImageDatabase():
     testSet, testLabels = [], []
 
     # Load arrays with images if the size is 2000x2000 px
-    for img in glob.glob('../../Test_Set/*.jpeg'):
+    for img in glob.glob('../../Test_Set/*.jpeg'): # Set path to testing images set
         image = cv2.imread(img, 0)
         if image.shape == (2000, 2000):
             testSet.append(image)
@@ -37,7 +37,7 @@ def loadImageDatabase():
 
             testLabels.append(labelID.index(name))
 
-    for img in glob.glob('../../Train_Set/*.jpeg'):
+    for img in glob.glob('../../Train_Set/*.jpeg'): # Set path to training images set
         image = cv2.imread(img, 0)
         if image.shape == (2000, 2000):
             trainSet.append(image)
@@ -61,7 +61,7 @@ def loadImageDatabase():
 
     return (trainSet, trainLabels, testSet, testLabels)
 
-@profile
+# @profile
 def buildModel():
     model = tf.keras.Sequential([
         tf.keras.layers.Flatten(input_shape=(2000, 2000)),
@@ -69,21 +69,19 @@ def buildModel():
         tf.keras.layers.Dense(11)])
     return model
 
-@profile
+# @profile
 def compileModel(model):
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
     return model
 
-@profile
+# @profile
 def trainModel(model, trainSet, trainLabels, iterations):
     model.fit(trainSet, trainLabels, epochs=iterations)
     return model
 
 ##################### main #####################
-
-
 # Load data sets
 (trainSet, trainLabels, testSet, testLabels) = loadImageDatabase()
 
@@ -94,7 +92,7 @@ model = buildModel()
 model = compileModel(model)
 
 # Train model
-model = trainModel(model, trainSet, trainLabels, 50)
+model = trainModel(model, trainSet, trainLabels, 10) # Change the number of training iterations here
 
 # Save model
-# model.save('../../SavedModels/faceRecognitionModel_50')
+model.save('../../SavedModels/faceRecognitionModel_10') # Set path for model saving

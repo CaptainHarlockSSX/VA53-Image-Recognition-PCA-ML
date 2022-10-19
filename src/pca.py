@@ -9,21 +9,19 @@ import matplotlib.pyplot as plt
 import math
 
 # Pick images from dataset and load them
-
-
 def loadImageDatabase():
     trainSet, trainLabels = [], []
     testSet, testLabels = [], []
 
-    for train in glob.glob('../../Train_Set/*.jpeg'):
+    for train in glob.glob('../../Train_Set/*.jpeg'): # Set path to training images set
         trainSet.append(cv2.imread(train, 0))
         trainLabels.append(re.findall(
-            '../../Train_Set/(.*)_.*.jpeg', train)[0])
+            '../../Train_Set/(.*)_.*.jpeg', train)[0]) # Set path to training images set
 
-    for test in glob.glob('../../Test_Set/*.jpeg'):
+    for test in glob.glob('../../Test_Set/*.jpeg'): # Set path to testing images set
         testSet.append(cv2.imread(test, 0))
         testLabels.append(re.findall(
-            '../../Test_Set/(.*)_.*.jpeg', test)[0])
+            '../../Test_Set/(.*)_.*.jpeg', test)[0]) # Set path to testing images set
 
     trainLabels = np.array(trainLabels)
     testLabels = np.array(testLabels)
@@ -31,7 +29,7 @@ def loadImageDatabase():
     return (trainSet, trainLabels, testSet, testLabels, faceshape)
 
 
-@profile
+# @profile
 def picturesToLines(faces):
     # M pixels (width*height = M) times N samples
     A = []
@@ -42,8 +40,6 @@ def picturesToLines(faces):
     return A
 
 # Was supposed to be the base of our own PCA method
-
-
 def findEigenvectors(mat):
     # Substracting the mean vector to all vectors
     subMatrix = mat - mat.mean(axis=0, keepdims=True)
@@ -59,7 +55,7 @@ def findEigenvectors(mat):
     return normEigenV
 
 
-@profile
+# @profile
 def createPCAFaces(A, order):
     # matrix = findEigenvectors(A)
 
@@ -86,11 +82,10 @@ def getImageInputByName():
     return query
 
 
-@profile
+# @profile
 def identifyFace(testSet, weights, pca, e_faces):
 
     # query = getImageInputByName() #if you want to test one image at a time
-
     best_matches = []
 
     for query in testSet:
@@ -126,12 +121,11 @@ def showResults(trainLabels, testSet, testLabels, best_matches):
 
     return 1
 
-
 ##################### main #####################
 (trainSet, trainLabels, testSet, testLabels, faceshape) = loadImageDatabase()
 A = picturesToLines(trainSet)
 
-e_faces, pca = createPCAFaces(A, 1)
+e_faces, pca = createPCAFaces(A, 30) # Change here the number of PCA components
 
 weights = e_faces @ (A - pca.mean_).transpose()
 best_matches = identifyFace(testSet, weights, pca, e_faces)
